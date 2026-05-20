@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Colin Friedman | Financial Planning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #080c14;
+      --ink2: #0d1522;
+      --steel: #151e2e;
+      --gold: #e0b870;
+      --gold2: #f0d090;
+      --fog: rgba(255,255,255,0.06);
+      --line: rgba(224,184,112,0.22);
+      --txt: rgba(255,255,255,0.62);
+      --txt2: rgba(255,255,255,0.38);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--ink);
+      color: #fff;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ─── GRAIN OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.028;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.6rem 3.5rem;
+      transition: background 0.4s, padding 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(8,12,20,0.92);
+      backdrop-filter: blur(18px);
+      padding: 1.1rem 3.5rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-brand {
+      display: flex; flex-direction: column; gap: 0.1rem;
+      text-decoration: none;
+    }
+    .nav-brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem; font-weight: 400; letter-spacing: 0.04em;
+      color: #fff;
+    }
+    .nav-brand-sub {
+      font-size: 0.65rem; font-weight: 300; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--gold);
+    }
+    .nav-links { display: flex; align-items: center; gap: 2.8rem; list-style: none; }
+    .nav-links a {
+      color: var(--txt2); text-decoration: none;
+      font-size: 0.78rem; font-weight: 300; letter-spacing: 0.12em;
+      text-transform: uppercase; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold2); }
+    .nav-contact-link {
+      color: var(--gold) !important;
+      border: 1px solid var(--line);
+      padding: 0.5rem 1.4rem;
+      border-radius: 0 !important;
+      transition: border-color 0.2s, background 0.2s !important;
+    }
+    .nav-contact-link:hover { border-color: var(--gold) !important; background: rgba(184,149,90,0.08) !important; }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative; min-height: 100vh;
+      display: grid; place-items: center;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(180deg, rgba(8,12,20,0.3) 0%, rgba(8,12,20,0.65) 55%, var(--ink) 100%),
+        url('https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Chicago_skyline%2C_viewed_from_John_Hancock_Center.jpg/1600px-Chicago_skyline%2C_viewed_from_John_Hancock_Center.jpg')
+        center 40% / cover no-repeat;
+    }
+    /* subtle animated gradient shimmer */
+    .hero-bg::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(184,149,90,0.06) 0%, transparent 65%);
+      animation: shimmer 8s ease-in-out infinite alternate;
+    }
+    @keyframes shimmer {
+      from { opacity: 0.5; transform: scale(1); }
+      to   { opacity: 1;   transform: scale(1.04); }
+    }
+
+    .hero-content {
+      position: relative; text-align: center;
+      padding: 0 2rem;
+      display: flex; flex-direction: column; align-items: center;
+      animation: heroIn 1.2s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes heroIn {
+      from { opacity: 0; transform: translateY(36px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      font-size: 0.7rem; font-weight: 300; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 2rem;
+      opacity: 0; animation: heroIn 1s 0.2s both;
+    }
+    .hero-tag span { width: 28px; height: 1px; background: var(--gold); display: block; }
+
+    .hero-h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.6rem, 7vw, 6.5rem);
+      font-weight: 300;
+      line-height: 1.04;
+      letter-spacing: -0.01em;
+      color: #fff;
+      margin-bottom: 2rem;
+      opacity: 0; animation: heroIn 1s 0.35s both;
+    }
+    .hero-h1 em { font-style: italic; color: var(--gold2); }
+
+    .hero-sub {
+      max-width: 520px;
+      font-size: 1rem; font-weight: 300; line-height: 1.8;
+      color: var(--txt); margin-bottom: 3rem;
+      opacity: 0; animation: heroIn 1s 0.5s both;
+    }
+
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 0.8rem;
+      background: var(--gold); color: var(--ink);
+      padding: 0.95rem 2.6rem;
+      font-size: 0.8rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      opacity: 0; animation: heroIn 1s 0.65s both;
+    }
+    .hero-cta:hover { background: var(--gold2); transform: translateY(-2px); }
+    .hero-cta svg { transition: transform 0.2s; }
+    .hero-cta:hover svg { transform: translateX(4px); }
+
+    .hero-scroll {
+      position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      color: var(--txt2); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+      animation: bounce 2s 2s infinite;
+    }
+    .hero-scroll-line {
+      width: 1px; height: 48px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+    }
+    @keyframes bounce {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* ─── SECTION WRAPPER ─── */
+    .wrap { max-width: 1060px; margin: 0 auto; }
+
+    /* ─── SERVICES ─── */
+    #services { padding: 7rem 3.5rem; background: var(--ink2); }
+    .section-head { margin-bottom: 4rem; }
+    .section-tag {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      font-size: 0.68rem; font-weight: 300; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 1.25rem;
+    }
+    .section-tag span { width: 24px; height: 1px; background: var(--gold); display: block; }
+    .section-head h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.4rem, 4vw, 3.6rem);
+      font-weight: 300; line-height: 1.1; color: #fff;
+    }
+    .section-head h2 em { font-style: italic; color: var(--gold2); }
+
+    .services-list { display: flex; flex-direction: column; gap: 0; }
+    .svc {
+      display: grid; grid-template-columns: 3rem 1fr;
+      gap: 0 2rem; padding: 2.2rem 0;
+      border-bottom: 1px solid var(--line);
+      transition: background 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .svc::before {
+      content: ''; position: absolute; left: 0; top: 0;
+      width: 2px; height: 0; background: var(--gold);
+      transition: height 0.4s ease;
+    }
+    .svc:hover::before { height: 100%; }
+    .svc:first-child { border-top: 1px solid var(--line); }
+    .svc-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem; color: var(--gold); font-weight: 400;
+      padding-top: 0.15rem; letter-spacing: 0.04em;
+    }
+    .svc-body {}
+    .svc-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.55rem; font-weight: 400; color: #fff;
+      margin-bottom: 0.5rem; letter-spacing: 0.01em;
+      transition: color 0.2s;
+    }
+    .svc:hover .svc-title { color: var(--gold2); }
+    .svc-desc {
+      font-size: 0.875rem; font-weight: 300; line-height: 1.75;
+      color: var(--txt);
+    }
+
+    /* ─── ABOUT ─── */
+    #about { padding: 7rem 3.5rem; background: var(--ink); }
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1.1fr;
+      gap: 6rem; align-items: start;
+    }
+    .about-left {}
+    .about-monogram {
+      width: 180px; height: 180px;
+      border: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 2.5rem; position: relative;
+    }
+    .about-monogram::after {
+      content: '';
+      position: absolute; inset: 6px;
+      border: 1px solid rgba(184,149,90,0.1);
+    }
+    .about-monogram span {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 4.5rem; font-weight: 300;
+      color: var(--gold); letter-spacing: -0.04em;
+    }
+    .about-facts { display: flex; flex-direction: column; gap: 0; margin-top: 0; }
+    .fact {
+      padding: 1.1rem 0;
+      border-bottom: 1px solid var(--line);
+      display: flex; flex-direction: column; gap: 0.2rem;
+    }
+    .fact:first-child { border-top: 1px solid var(--line); }
+    .fact-label {
+      font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--txt2); font-weight: 300;
+    }
+    .fact-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; color: #fff; font-weight: 400;
+    }
+
+    .about-right {}
+    .about-right h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 3.5vw, 3.2rem);
+      font-weight: 300; line-height: 1.1;
+      margin-bottom: 2rem; color: #fff;
+    }
+    .about-right h2 em { font-style: italic; color: var(--gold2); }
+    .about-right p {
+      font-size: 0.925rem; font-weight: 300; line-height: 1.9;
+      color: var(--txt); margin-bottom: 1.4rem;
+    }
+    .about-quote {
+      margin: 2.5rem 0;
+      padding-left: 1.5rem;
+      border-left: 1px solid var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem; font-weight: 300; font-style: italic;
+      color: rgba(255,255,255,0.82); line-height: 1.55;
+    }
+
+    /* ─── CONTACT ─── */
+    #contact { padding: 7rem 3.5rem; background: var(--steel); }
+    .contact-inner {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 6rem; align-items: center;
+    }
+    .contact-left h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.4rem, 4vw, 3.8rem);
+      font-weight: 300; line-height: 1.08; color: #fff; margin-bottom: 1.5rem;
+    }
+    .contact-left h2 em { font-style: italic; color: var(--gold2); }
+    .contact-left p {
+      font-size: 0.9rem; font-weight: 300; line-height: 1.85; color: var(--txt);
+    }
+    .contact-cards { display: flex; flex-direction: column; gap: 1rem; }
+    .contact-card {
+      display: flex; align-items: center; gap: 1.4rem;
+      padding: 1.6rem 2rem;
+      border: 1px solid var(--line);
+      text-decoration: none;
+      transition: border-color 0.25s, background 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .contact-card::before {
+      content: ''; position: absolute;
+      inset: 0; background: rgba(184,149,90,0.04);
+      opacity: 0; transition: opacity 0.25s;
+    }
+    .contact-card:hover { border-color: var(--gold); }
+    .contact-card:hover::before { opacity: 1; }
+    .contact-icon {
+      width: 44px; height: 44px; flex-shrink: 0;
+      border: 1px solid var(--line);
+      display: grid; place-items: center;
+      color: var(--gold); font-size: 1.1rem;
+      transition: border-color 0.25s;
+    }
+    .contact-card:hover .contact-icon { border-color: var(--gold); }
+    .contact-info { display: flex; flex-direction: column; gap: 0.2rem; }
+    .contact-label {
+      font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--txt2); font-weight: 300;
+    }
+    .contact-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; color: #fff; font-weight: 400;
+      transition: color 0.2s;
+    }
+    .contact-card:hover .contact-value { color: var(--gold2); }
+    .contact-arrow { margin-left: auto; color: var(--gold); opacity: 0; transition: opacity 0.2s, transform 0.2s; }
+    .contact-card:hover .contact-arrow { opacity: 1; transform: translateX(4px); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--ink);
+      border-top: 1px solid var(--line);
+      padding: 2rem 3.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem; color: var(--gold); font-weight: 400;
+    }
+    footer p { font-size: 0.72rem; color: var(--txt2); font-weight: 300; letter-spacing: 0.04em; }
+
+    /* ─── FADE IN ─── */
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.on { opacity: 1; transform: none; }
+    .reveal-d1 { transition-delay: 0.1s; }
+    .reveal-d2 { transition-delay: 0.2s; }
+    .reveal-d3 { transition-delay: 0.3s; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 860px) {
+      nav { padding: 1.2rem 1.5rem; }
+      nav.scrolled { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      #services, #about, #contact { padding: 5rem 1.5rem; }
+      .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .about-monogram { width: 120px; height: 120px; }
+      .about-monogram span { font-size: 3rem; }
+      .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
+      footer { padding: 1.5rem; flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-brand">
+    <span class="nav-brand-name">Colin Friedman</span>
+    <span class="nav-brand-sub">Financial Planning</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact" class="nav-contact-link">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-tag"><span></span>Chicago, Illinois<span></span></div>
+    <h1 class="hero-h1">Protect. Simplify.<br><em>Grow.</em></h1>
+    <p class="hero-sub">I help families and professionals protect their income, simplify their retirement accounts, and build long‑term financial security — with clarity, honesty, and a plan that actually works.</p>
+    <a href="#services" class="hero-cta">
+      Explore Services
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+  <div class="hero-scroll">
+    <div class="hero-scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="section-tag"><span></span>What I Offer</div>
+      <h2>Services Built<br><em>Around You</em></h2>
+    </div>
+    <div class="services-list">
+      <div class="svc reveal reveal-d1">
+        <div class="svc-num">01</div>
+        <div class="svc-body">
+          <div class="svc-title">Term Life Insurance</div>
+          <div class="svc-desc">Affordable coverage that protects your family for a set number of years. Designed to replace income, cover the mortgage, or protect children if something unexpected happens.</div>
+        </div>
+      </div>
+      <div class="svc reveal reveal-d2">
+        <div class="svc-num">02</div>
+        <div class="svc-body">
+          <div class="svc-title">Whole Life Insurance</div>
+          <div class="svc-desc">Permanent coverage that lasts your entire life and builds guaranteed cash value over time. Used for long‑term protection, legacy planning, or tax‑advantaged savings.</div>
+        </div>
+      </div>
+      <div class="svc reveal reveal-d3">
+        <div class="svc-num">03</div>
+        <div class="svc-body">
+          <div class="svc-title">Indexed Universal Life (IUL)</div>
+          <div class="svc-desc">Flexible life insurance that builds cash value based on market performance — without market losses. Used for retirement income, tax‑free growth, and long‑term protection.</div>
+        </div>
+      </div>
+      <div class="svc reveal reveal-d1">
+        <div class="svc-num">04</div>
+        <div class="svc-body">
+          <div class="svc-title">Mortgage Protection</div>
+          <div class="svc-desc">Life insurance designed to pay off or cover your mortgage if you pass away or become seriously ill. Helps families keep their home during the most difficult times.</div>
+        </div>
+      </div>
+      <div class="svc reveal reveal-d2">
+        <div class="svc-num">05</div>
+        <div class="svc-body">
+          <div class="svc-title">401(k) / 403(b) to IRA Rollovers</div>
+          <div class="svc-desc">If you've changed jobs, you may have old retirement accounts with previous employers. I help you consolidate them into one simple IRA so you stay in control of your retirement.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="wrap">
+    <div class="about-grid">
+      <div class="about-left reveal">
+        <div class="about-monogram"><span>CF</span></div>
+        <div class="about-facts">
+          <div class="fact">
+            <div class="fact-label">Background</div>
+            <div class="fact-value">Accountant · South Africa</div>
+          </div>
+          <div class="fact">
+            <div class="fact-label">Location</div>
+            <div class="fact-value">Chicago, Illinois</div>
+          </div>
+          <div class="fact">
+            <div class="fact-label">Focus</div>
+            <div class="fact-value">Families &amp; Professionals</div>
+          </div>
+          <div class="fact">
+            <div class="fact-label">Approach</div>
+            <div class="fact-value">Clarity. Honesty. Results.</div>
+          </div>
+        </div>
+      </div>
+      <div class="about-right reveal reveal-d2">
+        <div class="section-tag"><span></span>My Story</div>
+        <h2>Finance the Way<br><em>It Should Be</em></h2>
+        <p>I started my career as an accountant in South Africa, where I learned how money really works — not just on paper, but in real life for families, business owners, and everyday people trying to build a secure future.</p>
+        <p>When I moved to the United States, I brought that same practical, straightforward approach to financial planning. Today, I help individuals and families protect their income, simplify their retirement accounts, and make confident long‑term decisions.</p>
+        <div class="about-quote">"My goal is always the same: clarity, honesty, and a plan that actually works."</div>
+        <p>As a parent of a special needs child, I understand the importance of long‑term protection and planning for the unexpected. That experience shapes the way I serve every client — with patience, empathy, and a commitment to doing what's right.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="wrap">
+    <div class="contact-inner">
+      <div class="contact-left reveal">
+        <div class="section-tag"><span></span>Get In Touch</div>
+        <h2>Let's Talk<br>About Your<br><em>Future</em></h2>
+        <p>No pressure, no jargon — just a simple conversation about what matters most to you and your family.</p>
+      </div>
+      <div class="contact-cards reveal reveal-d2">
+        <a class="contact-card" href="tel:7734800101">
+          <div class="contact-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.28h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.92z"/></svg>
+          </div>
+          <div class="contact-info">
+            <span class="contact-label">Phone</span>
+            <span class="contact-value">(773) 480‑0101</span>
+          </div>
+          <svg class="contact-arrow" width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a class="contact-card" href="mailto:colinfriedman180@gmail.com">
+          <div class="contact-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div class="contact-info">
+            <span class="contact-label">Email</span>
+            <span class="contact-value">colinfriedman180@gmail.com</span>
+          </div>
+          <svg class="contact-arrow" width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">Colin Friedman · Financial Planning</div>
+  <p>Chicago, Illinois</p>
+  <p>© 2026 Colin Friedman. All rights reserved.</p>
+</footer>
+
+<script>
+  // Nav scroll
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('on'); });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => io.observe(el));
+</script>
+</body>
+</html>
